@@ -62,7 +62,13 @@ class Mesh{
         }
     }
 
-
+    printPeerListWithChildren(){
+        console.log("Peer List: ");
+        for(var i = 0; i < this.peerList.length; i++){
+            console.log("\n"+this.peerList[i].id + " has children: ");
+            console.log(this.peerList[i].peerChildren);
+        }
+    }
 
 }
 
@@ -180,14 +186,13 @@ meshNetwork = new Mesh("meshNetwork");
 let minerList = [];
 minerList.push(new Miner(1, "Miner1", 50, null));
 minerList.push(new Miner(2, "Miner2", 50, 1));
-minerList.push(new Miner(3, "Miner3", 50, 2));
-// minerList.push(new Miner(4, "Miner4", 80, 2));
-// minerList.push(new Miner(5, "Miner5", 85, 1));
-// minerList.push(new Miner(6, "Miner6", 90, 3));
+minerList.push(new Miner(3, "Miner3", 50, 1));
+minerList.push(new Miner(4, "Miner4", 80, 1));
+minerList.push(new Miner(5, "Miner5", 85, 1));
+minerList.push(new Miner(6, "Miner6", 90, 3));
 minerList.forEach(miner => {
     meshNetwork.addToMesh(miner);
 });
-console.log(meshNetwork.wallet)
 
 testBlockchain = new Blockchain();
 var date = new Date(Date.now());
@@ -216,16 +221,17 @@ async function mineBlock(miner){
 // }
 
 // mine the block asynchronously, if the block is mined, proceed to the next block
-minerList.forEach(miner => {
-    setInterval(async () => {
-        await mineBlock(miner);
-    }, miner.power );
-});
+// minerList.forEach(miner => {
+//     setInterval(async () => {
+//         await mineBlock(miner);
+//     }, miner.power );
+// });
 
 
+meshNetwork.printPeerListWithChildren();
 
 
-console.log(testBlockchain.chain)
+// console.log(testBlockchain.chain)
 // console.log(meshNetwork.transactionPool)
 
 // testBlockchain.addBlock(
@@ -238,7 +244,6 @@ console.log(testBlockchain.chain)
 
 // console.log(meshNetwork.peerList);
 // meshNetwork.assignMinersToBlock
-// meshNetwork.showMesh();
-// meshNetwork.showPeersForMiner(minerList[0]);
+
 
 // add the miner id to the block
