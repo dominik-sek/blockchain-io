@@ -45,6 +45,7 @@ class blockchain{
     constructor(){
         this.chain = [this.createGenesisBlock()];
         this.difficulty = 2; 
+        this.miningReward = 10;
     }
    
     createGenesisBlock(){
@@ -53,12 +54,16 @@ class blockchain{
     getLastBlock(){
         return this.chain[this.chain.length - 1];
     }
+
     addBlock(newBlock){
         newBlock.previousHash = this.getLastBlock().hash;
         newBlock.hash = newBlock.calculateHash();
         newBlock.proofOfWork(this.difficulty);
         this.chain.push(newBlock);
     }
+
+
+
     isChainValid(){
         for(let i = 1; i < this.chain.length; i++){
             const currentBlock = this.chain[i];
@@ -109,5 +114,3 @@ console.log(test.addBlock(
 console.log("=====================================================================================================================================")
 console.log(JSON.stringify(test, null, 4));
 // console.log(test)
-//
-
