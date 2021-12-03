@@ -61,6 +61,19 @@ class Mesh{
             }
         }
     }
+    //TODO
+    //add a transaction to the blockchain
+    // addTransaction(transaction){
+    //     this.currHeader.transactions.push(transaction);
+    // }
+
+    printPeerList(){
+        console.log("Peer List: ");
+        for(var i = 0; i < this.peerList.length; i++){
+            console.log(this.peerList[i].id);
+        }
+    }
+
 
     printPeerListWithChildren(){
         console.log("Peer List: ");
@@ -98,7 +111,10 @@ class Block{ // contains current block and previous block
         return SHA256(this.index + this.previousHash + this.timestamp
              + JSON.stringify(this.data) + this.nonce).toString(); 
     }
+    isBlock(block){
 
+    }
+    //guess a single nonce, hash it then check if its a block, if its not then increment the nonce, return 
     proofOfWork(difficulty){
 
     while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){ // 
@@ -152,7 +168,8 @@ constructor(){
     addBlock(newBlock, miner, meshNetwork){
         newBlock.previousHash = this.getLastBlock().hash;
         newBlock.hash = newBlock.calculateHash();
-        newBlock.proofOfWork(Math.floor(this.difficulty / miner.power));
+        newBlock.proofOfWork(Math.floor(this.difficulty / miner.power)); //TODO: include the reward in the calculation
+        //possiblh changing the reward 
         //reward the miner for mining the block
         this.rewardMiner(miner, meshNetwork,newBlock);
         this.chain.push(newBlock);
@@ -207,6 +224,7 @@ function getDate(){
 
 
 
+
 async function mineBlock(miner){
     let newBlock = new Block(getDate(), testBlockchain.getLastBlock().hash);
     await testBlockchain.addBlock(newBlock, miner, meshNetwork);
@@ -220,18 +238,15 @@ async function mineBlock(miner){
 
 // }
 
-// mine the block asynchronously, if the block is mined, proceed to the next block
-// minerList.forEach(miner => {
-//     setInterval(async () => {
-//         await mineBlock(miner);
-//     }, miner.power );
-// });
+minerList.forEach(miner => {
+    setInterval(async () => {
+        await mineBlock(miner);
+    }, miner.power );
+});
 
 
-meshNetwork.printPeerListWithChildren();
 
-
-// console.log(testBlockchain.chain)
+console.log(testBlockchain.chain)
 // console.log(meshNetwork.transactionPool)
 
 // testBlockchain.addBlock(
