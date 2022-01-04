@@ -116,19 +116,12 @@ class Block{ // contains current block and previous block
     //guess a single nonce, hash it then check if its a block, if its not then increment the nonce, return 
     proofOfWork(difficulty){
         
-    if(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+    while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
         this.nonce++;
         this.hash = this.calculateHash();
-        return
-    }
-    // while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
-         
-    //     this.nonce++;
-    //     this.hash = this.calculateHash();
-    //    // console.log(`trying: ${this.hash} `);
 
-    // }
-//broadcast to all peers
+    }
+
 }
 
 }
@@ -138,10 +131,8 @@ class Blockchain{
 constructor(){
         this.chain = [this.createGenesisBlock()];
         this.difficulty = 2; 
-        this.miningReward = 40;
+        this.miningReward = 30;
     }
-   
-    //constructor(miner,timestamp, balances, previousHash = '') {
 
     createGenesisBlock(){
         return new Block("SYSTEM",Date().toString,{},"Genesis Block", "0");
@@ -172,8 +163,6 @@ constructor(){
         newBlock.previousHash = this.getLastBlock().hash;
         newBlock.hash = newBlock.calculateHash();
         newBlock.proofOfWork(this.difficulty); //TODO: include the reward in the calculation
-        //possiblh changing the reward 
-        //reward the miner for mining the block
         this.rewardMiner(miner, meshNetwork,newBlock);
         this.chain.push(newBlock);
         this.broadcastBlock(miner,newBlock,meshNetwork); //broadcast to all peers
@@ -197,15 +186,11 @@ constructor(){
 
 }
 
-    
-// mine the block asynchronously 
-
 
 meshNetwork = new Mesh("meshNetwork");
 // change difficulty of blockchain according to miner power 
 let minerList = [];
 // create a miner and add it to the mesh network
-
 
 minerList.push(
     new Miner(1, "1", 100),
@@ -218,19 +203,15 @@ minerList.forEach(miner=>{
     meshNetwork.addToMesh(miner)
 })
 
+
 testBlockchain = new Blockchain();
 
 
-
-
-//constructor(miner,timestamp, balances, previousHash = '') {
-
-
- async function mineBlock(miner){
+function mineBlock(miner){
     var date = new Date(Date.now());
     function getDate(){
         return date.getDate() 
-        + "/" + date.getMonth() 
+        + "/" + date.getMonth()+1 
         + "/" + date.getFullYear() 
         + " " + date.getHours() 
         + ":" + date.getMinutes() 
@@ -240,17 +221,10 @@ testBlockchain = new Blockchain();
     let newBlock = new Block(miner.id,getDate(), testBlockchain.getLastBlock().hash);
     testBlockchain.addBlock(newBlock, miner, meshNetwork);
     console.log("Block Mined: " + newBlock.hash + " by " + miner.id);
-    // //log all balances
-    // console.log("Balances: ");
-    // for(var i = 0; i < minerList.length; i++){
-    //     console.log(minerList[i].name + ": " + meshNetwork.wallet[i].balance);
-    // }
-    console.log(testBlockchain.chain);
+    console.log(testBlockchain.getLastBlock());
+    console.log("================================================")
 }
-
 
 for(var i = 0; i < minerList.length; i++){
     setInterval(mineBlock, (testBlockchain.difficulty/minerList[i].power)*100000, minerList[i]);
 }
-
-
