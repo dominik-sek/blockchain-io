@@ -192,7 +192,7 @@ constructor(){
             // newBlock.balances.push(this.pendingTransactions);
             this.pendingTransactions = [];
         }
-        for(var i = 0; i < meshNetwork.peerList.length; i++){
+        for(let i = 0; i < meshNetwork.peerList.length; i++){
             if(meshNetwork.peerList[i].id == miner.id){
                 //add to pending transactions then return this list
                 miner.wallet.addToWallet(this.miningReward);
@@ -271,7 +271,17 @@ minerList.forEach(miner=>{
 
 
 testBlockchain = new Blockchain();
-console.log(minerList)
+
+function printValues(obj) {
+    for (var key in obj) {
+        if (typeof obj[key] === "object") {
+            printValues(obj[key]);   
+        } else {
+            console.log(obj[key]);    
+        }
+    }
+}
+
 
 function mineBlock(miner){
     var date = new Date(Date.now());
@@ -286,19 +296,22 @@ function mineBlock(miner){
     let newBlock = new Block(miner.id,getDate(), testBlockchain.getLastBlock().hash);
 
     if(miner.wallet.balance < 0){
+        //TODO: remove miner from network
         console.log("Miners wallet is empty");
         return;
     }else{
         miner.wallet.removeFromWallet((miner.power/testBlockchain.miningReward)*0.1);
         testBlockchain.addBlock(newBlock, miner, meshNetwork);
         console.log("Block Mined: " + newBlock.hash + " by " + miner.id);
-        console.log(testBlockchain.chain);
-        console.log(testBlockchain.getLastBlock().transactions)
-        console.log("================================================")
+        testBlockchain.chain.map(
+            block => {
+                console.log(block);
+            }
+        )
+        // var jsonString = JSON.stringify(testBlockchain.chain, null, '\t');
+        // console.log(jsonString)
     }
 
-
-    
 }
 
 // start mining 
