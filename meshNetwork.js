@@ -3,7 +3,7 @@ const SHA256 = require("crypto-js/sha256");
 class Wallet{
     constructor(miner){
         this.walletAddress = this.generateAddress(miner);
-        this.balance = 0;
+        this.balance = 50;
     }
     createWallet(){
         return new Wallet();
@@ -129,13 +129,13 @@ class Miner{
 }
 
 class Block{ // contains current block and previous block
-    constructor(minerAddress,timestamp, balances, previousHash = '') {
+    constructor(minerAddress,timestamp, transactions, previousHash = '') {
         this.minerAddress = minerAddress;
         this.timestamp = timestamp; // time of creation of the block in unix seconds
         this.previousHash = previousHash; // index of the previous block
         this.nonce = 0; 
         this.hash = this.calculateHash(); // sha256 hash of the block
-        this.balances = {}; //keeps track of balances for each miner
+        this.transactions = []; //keeps track of balances for each miner
         
     }
 
@@ -185,14 +185,29 @@ constructor(){
    
     
     rewardMiner(miner,meshNetwork, newBlock){
+        if(this.pendingTransactions.length > 0){
+            this.pendingTransactions.forEach(transaction => {
+                newBlock.transactions.push(transaction);
+            });
+            // newBlock.balances.push(this.pendingTransactions);
+            this.pendingTransactions = [];
+        }
         for(var i = 0; i < meshNetwork.peerList.length; i++){
             if(meshNetwork.peerList[i].id == miner.id){
                 //add to pending transactions then return this list
                 miner.wallet.addToWallet(this.miningReward);
-                newBlock.balances[miner.wallet.walletAddress] = miner.wallet.balance;
+
+                this.pendingTransactions.push({
+                    from: "SYSTEM",
+                    to: miner.address,
+                    amount: this.miningReward
+                });
+
+                // newBlock.balances[miner.wallet.walletAddress] = miner.wallet.balance;
             }else{
-                meshNetwork.peerList[i].wallet.removeFromWallet((meshNetwork.peerList[i].power/this.miningReward)*0.1);
-                newBlock.balances[meshNetwork.peerList[i].wallet.walletAddress] = meshNetwork.peerList[i].wallet.balance
+
+
+                // newBlock.balances[meshNetwork.peerList[i].wallet.walletAddress] = meshNetwork.peerList[i].wallet.balance
             }
             // if(meshNetwork.wallet[i].id == miner.id){
             //     meshNetwork.wallet[i].balance += this.miningReward;
@@ -268,15 +283,25 @@ function mineBlock(miner){
         + ":" + date.getMinutes() 
         + ":" + date.getSeconds();
     }
-
     let newBlock = new Block(miner.id,getDate(), testBlockchain.getLastBlock().hash);
-    testBlockchain.addBlock(newBlock, miner, meshNetwork);
-    console.log("Block Mined: " + newBlock.hash + " by " + miner.id);
-    console.log(testBlockchain.chain);
-    console.log("================================================")
+
+    if(miner.wallet.balance < 0){
+        console.log("Miners wallet is empty");
+        return;
+    }else{
+        miner.wallet.removeFromWallet((miner.power/testBlockchain.miningReward)*0.1);
+        testBlockchain.addBlock(newBlock, miner, meshNetwork);
+        console.log("Block Mined: " + newBlock.hash + " by " + miner.id);
+        console.log(testBlockchain.chain);
+        console.log(testBlockchain.getLastBlock().transactions)
+        console.log("================================================")
+    }
+
+
+    
 }
 
 // start mining 
 for(var i = 0; i < minerList.length; i++){
-    setInterval(mineBlock, (testBlockchain.difficulty/minerList[i].power)*1000000, minerList[i]);
+    setInterval(mineBlock, (testBlockchain.difficulty/minerList[i].power)*100000, minerList[i]);
 }
